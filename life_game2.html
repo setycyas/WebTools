@@ -1,0 +1,199 @@
+<!docType html>
+
+<html>
+<!-- 生命模拟游戏的优化版 -->
+<!-- HEAD -->
+<head>
+<meta charset="UTF-8">
+<title>life game</title>
+<script>
+  /* 常量设定 */
+  const SIZE = 35; // 格子数,长于宽相同
+  const GRID_WIDTH = 15; // 格子宽度
+  const GRID_HEIGHT = 15; // 格子高度
+  const BACKGROUND_COLOR = 'black'; // 图形背景色
+  const LINE_COLOR = 'yellow'; // 分隔线色
+  const LIFE_COLOR = 'green'; // 生命格子色
+  
+  var oldData = newData()
+  var data = newData();
+  
+  /* 初始设置 */
+  function onload(){
+    // 页面背景
+    document.getElementsByTagName('body')[0].style = 
+      "background: rgb(0, 46, 49) none repeat scroll 0% 0%; text-align: center;";
+    // canvas设置
+    var can = document.getElementById('myCanvas');
+    can.width = GRID_WIDTH*SIZE+1*(SIZE+1);
+    can.height = GRID_HEIGHT*SIZE+1*(SIZE+1);
+    can.style = 'border:1px solid '+LINE_COLOR+';';
+    // canvas背景
+    drawBackground();
+    // 设定最初的存活方格
+    setFirstLife();
+    refresh();
+  }
+  
+  /* 画背景色与分隔格子的线条 */
+  function drawBackground(){
+    var can = document.getElementById('myCanvas');
+    var ctx = can.getContext('2d');
+    // 背景色
+    ctx.fillStyle = BACKGROUND_COLOR;
+    ctx.fillRect(0, 0, can.width, can.height);
+    // 线条
+    ctx.fillStyle = LINE_COLOR;
+    var x = 0;
+    while(x < can.width){
+      ctx.fillRect(x, 0, 1, can.height);
+      x += GRID_WIDTH+1;
+    }
+    var y = 0;
+    while(y < can.height){
+      ctx.fillRect(0, y, can.width, 1);
+      y += GRID_HEIGHT+1;
+    }
+  }
+  
+  /* 画一个生命格子 */
+  function drawLifeGrid(row, col){
+    var can = document.getElementById('myCanvas');
+    var ctx = can.getContext('2d');
+    var x = 1+(GRID_WIDTH+1)*row;
+    var y = 1+(GRID_HEIGHT+1)*col;
+    ctx.fillStyle = LIFE_COLOR;
+    ctx.fillRect(x, y, GRID_WIDTH, GRID_HEIGHT);
+  }
+  
+  /* 刷新生命图 */
+  function refresh(){
+    drawBackground();
+    for(var i = 0;i < SIZE;i++){
+      for(var j = 0;j < SIZE;j++){
+        if (data[i][j] > 0){
+          drawLifeGrid(i ,j);
+        }
+      } 
+    }
+  }
+  
+  /**
+   * 以上是画图用的函数,以下则是生命模拟的逻辑
+  **/
+  
+  /* 设定最初的存活方格 */
+  function setFirstLife(){
+    /* 连续3格直线型,形成简单的横线-竖线循环 
+    data[10][10] = 1;
+    data[10][11] = 1;
+    data[10][9] = 1;
+    */
+    /* 3格成L型,变成4格正方形,稳定不动
+    data[10][10] = 1;
+    data[10][11] = 1;
+    data[11][10] = 1;
+    */
+    /* 简单的滑翔机循环4步 */
+    data[1][2] = 1;
+    data[2][3] = 1;
+    data[3][1] = 1;
+    data[3][2] = 1;
+    data[3][3] = 1;
+  }
+  
+  /* 获取一个新的SIZE*SIZE数组,初始化全部为0 */
+  function newData(){
+    var arr = new Array(SIZE);
+    for(var i = 0;i < SIZE;i++){
+      var arr0 = new Array(SIZE);
+      for(var j = 0;j < SIZE;j++){
+        arr0[j] = 0;
+      }
+      arr[i] = arr0;
+    }    
+    return arr;
+  }
+  
+  /* 获取位置x,y的相邻存活格子数 */
+  function getLifeNeibours(oldData, x, y){
+    var result = 0;
+    var neibours = [];
+    neibours.push([(SIZE+(x-1))%SIZE, (SIZE+(y-1))%SIZE]);
+    neibours.push([(SIZE+(x))%SIZE, (SIZE+(y-1))%SIZE]);
+    neibours.push([(SIZE+(x+1))%SIZE, (SIZE+(y-1))%SIZE]);
+    neibours.push([(SIZE+(x-1))%SIZE, (SIZE+(y))%SIZE]);
+    neibours.push([(SIZE+(x+1))%SIZE, (SIZE+(y))%SIZE]);
+    neibours.push([(SIZE+(x-1))%SIZE, (SIZE+(y+1))%SIZE]);
+    neibours.push([(SIZE+(x))%SIZE, (SIZE+(y+1))%SIZE]);
+    neibours.push([(SIZE+(x+1))%SIZE, (SIZE+(y+1))%SIZE]);
+    for(var i = 0;i < neibours.length;i++){
+      var pos = neibours[i]
+      if (oldData[pos[0]][pos[1]] > 0){
+        result++;
+      }
+    }
+    return result;
+  }
+  
+  /* 世代更替逻辑,输入旧世代,返回新世代*/
+  function getNextData(){
+    // 复制data到oldData
+    for(var i = 0;i < SIZE;i++){
+      for(var j = 0;j < SIZE;j++){
+        oldData[i][j] = data[i][j];
+      }
+    }
+    // 制作下一步的data
+    for(var i = 0;i < SIZE;i++){
+      for(var j = 0;j < SIZE;j++){
+        var lifeNeibours = getLifeNeibours(oldData, i, j);
+        // 原来的活方格
+        if(oldData[i][j] > 0){
+          if ((lifeNeibours == 2)||(lifeNeibours == 3)){
+            data[i][j] = 1;
+          }else{
+            data[i][j] = 0;
+          }
+        }
+        // 原来的死方格
+        else{
+          if (lifeNeibours == 3){
+            data[i][j] = 1;
+          }else{
+            data[i][j] = 0;
+          }
+        }
+      }
+    }
+    return;    
+  }
+  
+  /* 显示下一世代 */
+  function goNext(){
+    getNextData();
+    refresh();
+  }
+  
+  /* 点击图像,切换状态 */
+  function clickCanvas(event){
+    var can = document.getElementById('#myCanvas');
+    var x = event.clientX-can.offsetLeft;
+    var y = event.clientY-can.offsetTop;
+    //console.log('click '+x+', '+y);
+    var i = Math.floor(x/(GRID_WIDTH+1));
+    var j = Math.floor(y/(GRID_WIDTH+1));
+    if (data[i][j] == 1){
+      data[i][j] = 0;
+    }else{
+      data[i][j] = 1;
+    }
+    refresh();
+  }
+</script>
+</head>
+<!-- BODY -->
+<body onload="onload();">
+<canvas id="myCanvas" onclick="clickCanvas(event);"></canvas>
+<button id="myButton" onclick="goNext();">Go Next</button>
+</body>
