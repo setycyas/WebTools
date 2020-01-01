@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="Author" content="setycyas">
+  <link rel="stylesheet" href="../bootstrap.css" type="text/css" />
+  <link rel="stylesheet" href="../style.css" type="text/css" />
+  <script src="../jquery.min.js"></script>
+  <script src="../bootstrap.min.js"></script>
+  <title>myHash1</title>
+  <script>
+  /* Custom Script Here*/
+
+  /* Define global variables */
+
+  /* Define methods */
+  //把字母(不分大小写，转换出来全是小写),下划线,数字0-9这个集合中任一字符转换为一个0-36的整数,-1表示参数错误
+	function my_char2int(cha){
+		
+		var result=-1;
+		var charCode=(cha.toLowerCase()).charCodeAt();
+		
+		//下划线为0
+		if (cha=="_"){
+			result=0;
+		}
+		
+		//反序,9-0转为1-10.反序的目的是令破解者增加麻烦
+		if (charCode>=48 && charCode<=57){
+			result=58-charCode;
+		}
+		
+		//反序,z-a转为11-36
+		if(charCode>=97 && charCode<=122){
+			result=133-charCode;
+		}
+		
+		return result;
+	}
+	
+	//my_char2int的逆转换,-1表示转换失败
+	function my_int2char(n){
+		
+		var result=-1;
+		
+		if (n==0){
+			result="_";
+		}
+		
+		if (n>=1 && n<=10){
+			result=(10-n)+"";
+		}
+		
+		if(n>=11 && n<=36){
+			result=String.fromCharCode(133-n);
+		}
+		
+		return result;
+	}
+	
+	//对text进行加密,暂不考虑字母下划线等等,只是加密.用2的n次方模37做权,循环做开始位置,轮到的位置数值立方
+	function hash(text){
+	  var result="";
+		var lower=text.toLowerCase();
+		 
+		for(var i=0;i<lower.length;i++){		 
+		  var sum=0;
+			var weight=1;			
+			for(var j=0;j<lower.length;j++){
+				if(j>0){
+					sum+=my_char2int(lower.substr((j+i) % lower.length,1))*weight;
+				}else{
+					sum+=Math.pow(my_char2int(lower.substr((j+i) % lower.length,1)),3)*weight;
+				}
+				weight=(weight*2) % 37;
+			}
+			result+=my_int2char(sum % 37);
+		}
+		return result;
+	}
+	
+	//把密码标准化.字母开头,保证有字母数字和下划线,因为3种都要有,所以长度不可小于3
+	function standard(pw){
+		if(pw.length<3){
+			console.log("原密码长度最小为3");
+			return pw;
+		}
+	
+		var result="";
+		var arr=pw.toLowerCase().split("");
+		
+		//首先保证字母开头,后面的变换不再改变首字母
+		if(my_char2int(arr[0])<11){
+			arr[0]=String.fromCharCode(((26+my_char2int(arr[0])) % 26)+97);
+		}
+		
+		//遍历除开头字符的字符,如果找不到下划线,则把对应数值最大的字符改为下划线
+		var hasUnderLine=false;
+		var maxIndex=1;
+		for(var i=1;i<arr.length;i++){
+			if(arr[i]=="_"){
+				hasUnderLine=true;
+				break;
+			}else{
+				if(i==1){
+					continue;
+				}else{
+					if(my_char2int(arr[i])>my_char2int(arr[maxIndex])){
+						maxIndex=i;
+					}
+				}
+			}
+		}
+		if(hasUnderLine==false){
+			arr[maxIndex]="_";
+		}
+		
+		//最后,遍历除开头字符的字符,如果没有数字,把对应数值最大的字符改为5
+		var hasNumber=false;
+		maxIndex=1;
+		for(var i=1;i<arr.length;i++){
+			if(my_char2int(arr[i])>0 && my_char2int(arr[i])<11){
+				hasNumber=true;
+				break;
+			}else{
+				if(i==1){
+					continue;
+				}else{
+					if(my_char2int(arr[i])>my_char2int(arr[maxIndex])){
+						maxIndex=i;
+					}
+				}
+			}
+		}
+		if(hasNumber==false){
+			arr[maxIndex]="5";
+		}
+		//最后,把字符串重新连接
+		result=arr.join("");
+		return result;
+	}
+
+  /* Reply for html elements */
+	function jiami_click(){
+    var len=$("#pwLength").val();
+    var hashCode=hash($("#text").val());
+    $("#hashCode").val(hashCode.substr(0,len));
+	}
+	
+	function standard_click(){
+    var len=$("#pwLength").val();
+    var shortHashCode=$("#hashCode").val().substr(0,len);
+    $("#hashCode").val(standard(shortHashCode));
+	}
+  </script>
+</head>
+
+<body>
+<section id='main' class='container'>
+  <label class="control-label">待加密文本(仅限数字,小写字母,下划线):</label>
+  <input type="text" id="text" class='form-control' style='width:200px;border:1px solid green' 
+    placeholder="请输入待加密文本" />
+  <br/>
+	<input class='btn btn-primary' type="button" value="加密" onclick="jiami_click()">
+  <input class='btn btn-primary' type="button" value="标准化" onclick="standard_click()">
+  <input type="text" id="hashCode" class='form-control' style='width:200px;border:1px solid green' 
+    placeholder="这里显示加密结果" />
+  <label class="control-label">选择标准位数:</label>
+  <select id="pwLength" class="form-control" style='width:200px;border:1px solid green'>
+    <option value="8">8位</option>
+    <option value="10">10位</option>
+    <option value="12">12位</option>
+    <option value="16">16位</option>
+    <option value="20">20位</option>
+  </select>
+</section>
+</body>
+</html>
