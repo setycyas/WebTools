@@ -5,7 +5,7 @@
   <meta name="Author" content="setycyas">
   <link rel="stylesheet" href="libs/bootstrap.css" type="text/css" />
   <script src="libs/jquery.min.js"></script>
-  <title>标点转换</title>
+  <title>setycyas的标点转换github页面</title>
   <script>
   /* Custom Script Here*/
 
@@ -31,7 +31,7 @@
     /*  反替换句号中可能是链接中的点,
      如 www.abc.com,这里的.在前面被换成了句号,需要反替换一次
     */
-    result = result.replace(/([a-zA-Z])(。)([a-zA-Z])/g, '$1.$3');
+    result = result.replace(/([a-zA-Z0-9])(。)([a-zA-Z0-9])/g, '$1.$3');
     
     return result;
   }
