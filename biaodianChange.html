@@ -21,8 +21,9 @@
     result = result.replace(/!/g, '！'); //替换感叹号
     result = result.replace(/:/g, '：'); //替换冒号
     result = result.replace(/：\/\//g, '://') // 反替换http(s)后的冒号
+    result = result.replace(/(\[s)(：)(\d+\])/g, '[s:$3'); // 反替换表情相关的冒号
     result = result.replace(/\.{3,}/g, '……'); // 替换省略号
-    result = result.replace(/(")([^"]+)(")/g, '“$2”'); //替换冒号 
+    result = result.replace(/(")([^"]+)(")/g, '“$2”'); //替换引号 
     /* 替换小括号组合,如果内部没有英文字母 */
     result = result.replace(/(\()([^a-zA-Z]+)(\))/g, '（$2）'); 
     /* 替换中括号组合,如果内部没有英文字母 */
