@@ -3,16 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="Author" content="setycyas">
-  <link rel="stylesheet" href="libs/bootstrap.css" type="text/css" />
+  <link rel="stylesheet" href="libs/bootstrap.min.css" type="text/css" />
   <script src="libs/jquery.min.js"></script>
   <title>setycyas的标点转换github页面</title>
   <script>
-  /* Custom Script Here*/
-
-  /* Define global variables */
-
-  /* Define methods */
-  
+	  
   //替换str1的标点
   function _replace(str1){
     var result; // 返回值
@@ -38,13 +33,12 @@
   }
   
   // 点击替换按钮
-	function clicked(){
-		var text = _replace($('#inputText').val());
-		$('#outText').val(text);
+  function clicked(){
+    var text = _replace($('#inputText').val());
+    $('#outText').val(text);
     return
-	}
-	
-	
+  }
+		
   </script>
 </head>
 
