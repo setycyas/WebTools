@@ -20,6 +20,7 @@
     result = str1.replace(/,/g, '，'); //替换逗号
     result = result.replace(/!/g, '！'); //替换感叹号
     result = result.replace(/:/g, '：'); //替换冒号
+    result = result.replace(/：\/\//g, '://') // 反替换http(s)后的冒号
     result = result.replace(/\.{3,}/g, '……'); // 替换省略号
     result = result.replace(/(")([^"]+)(")/g, '“$2”'); //替换冒号 
     /* 替换小括号组合,如果内部没有英文字母 */
