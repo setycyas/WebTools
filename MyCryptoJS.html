@@ -1,0 +1,119 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN"> 
+
+<head> 
+<title>setycyas在线加密解密</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src='libs/jquery.min.js'></script>
+<script type="text/javascript" src='libs/Crypto-JS/core-min.js'></script>
+<script type="text/javascript" src='libs/Crypto-JS/aes.js'></script>
+<script type="text/javascript" src='libs/Crypto-JS/rabbit.js'></script>
+<script type="text/javascript" src='libs/Crypto-JS/rc4.js'></script>
+<script type="text/javascript" src='libs/Crypto-JS/tripledes.js'></script>
+<script>
+  
+  /* 加密,解密函数,接受与输出都是utf-8 */
+  /* 加密函数,参数为:明文,密码,加密类型,返回加密结果 */
+  function encrypt(src, pw, encryptType){
+    var encryptFunction;
+    switch(encryptType.toLowerCase()){ 
+      case "aes":
+        encryptFunction = CryptoJS.AES.encrypt;
+        break;
+      case "des":
+        encryptFunction = CryptoJS.DES.encrypt;
+        break;
+      case "rabbit":
+        encryptFunction = CryptoJS.Rabbit.encrypt;
+        break;
+      case "rc4":
+        encryptFunction = CryptoJS.RC4.encrypt;
+        break;
+      case "tripledes":
+        encryptFunction = CryptoJS.TripleDES.encrypt;
+        break;
+    }
+    return encryptFunction(src, pw);
+  }
+  
+  /* 解密函数,参数: 密文,密码,解密类型,返回解密结果 */
+  function decrypt(code, pw, decryptType){
+    var decryptFunction;
+    switch(decryptType.toLowerCase()){ 
+      case "aes":
+        decryptFunction = CryptoJS.AES.decrypt;
+        break;
+      case "des":
+        decryptFunction = CryptoJS.DES.decrypt;
+        break;
+      case "rabbit":
+        decryptFunction = CryptoJS.Rabbit.decrypt;
+        break;
+      case "rc4":
+        decryptFunction = CryptoJS.RC4.decrypt;
+        break;
+      case "tripledes":
+        decryptFunction = CryptoJS.TripleDES.decrypt;
+        break;
+    }
+    return decryptFunction(code, pw).toString(CryptoJS.enc.Utf8);
+  }
+  
+  /* onload绑定加密解密 */
+  function onload(){
+    console.log('加载页面完成!');
+    // 绑定加密函数
+    $('#encrypt').click(() => {
+      var encryptType = $('#type').val();
+      var src = $('#src').val();
+      var pw = $('#pw').val();
+      console.log('加密开始,类型为:'+encryptType);
+      var code = encrypt(src, pw, encryptType);
+      $('#code').val(code);
+      console.log('加密完成!');
+    });
+    // 绑定解密函数
+    $('#decrypt').click(() => {
+      var decryptType = $('#type').val();
+      var code = $('#code').val();
+      var pw = $('#pw').val();
+      console.log('解密开始,类型为:'+decryptType);
+      var src = decrypt(code, pw, decryptType);
+      $('#src').val(src);
+      console.log('解密完成!');
+    });
+    console.log('绑定加密解密函数完成!');
+  }
+  
+</script>
+</head>
+
+<body onload="onload();" style="padding:20px;">
+<h1>setycyas的在线加密解密(采用Crypto-JS实现),仿oschina</h1>
+<div id="main">
+  <div style="float:left;width:400px;height:400px;">
+    明文:<br/>
+    <textarea id="src">这里是明文</textarea>
+  </div>
+  <div style="float:left;width:200px;">
+    算法:<br/>
+    <select id="type" size="5">
+      <option value="aes">aes</option>
+      <option value="des">des</option>
+      <option value="rabbit">rabbit</option>
+      <option value="rc4">rc4</option>
+      <option value="tripledes">tripledes</option>
+    </select><br/>
+    密码:<br/>
+    <input id="pw" type="text" /><br/>
+    <input id="encrypt" type="button" value="加密->" /><br/>
+    <input id="decrypt" type="button" value="<-解密" />
+  </div>
+  <div style="float:left;width:400px;height:400px;">
+    密文:<br/>
+    <textarea id="code">这里是密文</textarea>
+  </div>
+</div>
+
+</body>
+</html>
